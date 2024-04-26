@@ -1,0 +1,79 @@
+version: '3.9'
+
+services:
+  fastapi:
+    build:
+      context: ./
+      dockerfile: fastapi/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_RW_URL=postgresql+asyncpg://arxiv_rw:notsecurepassword@db-rw:5432/arxiv
+      - DATABASE_RO_URL=postgresql+asyncpg://arxiv_ro:notsecurepassword@db-rw:5432/arxiv
+#      - DATABASE_SEQUENCE_URL=postgresql+asyncpg://arxiv_sequence:notsecurepassword@db-rw:5432/arxiv_sequence
+# Sqlalchemy has a known issue with Postgres Sequence objects.
+# It is not able perform this simple query:  SELECT nextval('arxiv_sequence');
+# So I'm forced to use psycopg2 for this.
+      - DATABASE_SEQUENCE_STRING=host='db-rw' port=5432 dbname='arxiv_sequence' user='arxiv_sequence' password='notsecurepassword'
+      - DEFAULT_MAX_QUERY_RESULTS=8
+      - RESULTS_DEFAULT_PAGE=0
+      - RESULTS_DEFAULT_ITEMS_PER_PAGE=100
+      - LOG_LEVEL=DEBUG
+    depends_on:
+      - db-rw
+      - syslog-ng
+    command: ["/code/wait-for-it.sh", "syslog-ng:601", "--", "/code/wait-for-it.sh", "db-rw:5432", "--", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    logging:
+      driver: syslog
+      options:
+        syslog-address: "tcp://localhost:601"
+        syslog-format: "rfc5424"
+        tag: "fastapi-container"
+
+  db-rw:
+    build:
+      context: ./
+      dockerfile: postgres/Dockerfile
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+      - ./postgres/arxiv_db.sql:/docker-entrypoint-initdb.d/arxiv_db.sql
+    expose:
+      - 5432
+    environment:
+      - POSTGRES_USER=wurzel
+      - POSTGRES_PASSWORD=notsecurepassword
+    depends_on:
+      - syslog-ng
+    restart: unless-stopped
+    logging:
+      driver: syslog
+      options:
+        syslog-address: "tcp://localhost:601"
+        syslog-format: "rfc5424"
+        tag: "db-rw-container"
+    healthcheck:
+      test: ["CMD", "netstat", "-ln", "|", "grep", "5432"]
+      interval: 3s
+      timeout: 2s
+      retries: 5
+#    command: ["/code/wait-for-it.sh", "syslog-ng:601", "--", "postgres"]
+
+  syslog-ng:
+    build: ./syslog-ng
+    volumes:
+      - ./syslog-ng/syslog-ng.conf:/config/syslog-ng.conf
+#      - /path/to/log:/var/log #optional
+    ports:
+#      - 514/udp
+      - 601:601/tcp
+#      - 6514/tcp
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "netstat", "-ln", "|", "grep", "601"]
+      interval: 3s
+      timeout: 2s
+      retries: 5
+
+volumes:
+  postgres_data:
+
