@@ -4,7 +4,7 @@ WORKDIR /code
 
 COPY ./fastapi/requirements.txt /code/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
-RUN apk add --no-cache --upgrade bash
+#RUN apk add --no-cache --upgrade bash
 
 COPY ./fastapi/app /code/app
 COPY ./wait-for-it.sh /code/wait-for-it.sh

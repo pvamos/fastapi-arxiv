@@ -12,4 +12,3 @@ FROM linuxserver/syslog-ng:4.5.0
 ENV PUID 1000
 ENV PGID 1000
 ENV TZ Etc/UTC
-
