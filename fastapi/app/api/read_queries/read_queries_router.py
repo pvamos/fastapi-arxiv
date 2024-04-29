@@ -20,11 +20,13 @@ async def read_queries(
     end_timestamp: Optional[int] = None, 
     db: AsyncSession = Depends(get_database_session_ro)):
 
-    logger.debug("read_queries(start_timestamp=%s, end_timestamp=%s):", str(start_timestamp), str(end_timestamp))
+    logger.info("read_queries(start_timestamp=%s, end_timestamp=%s): called", str(start_timestamp), str(end_timestamp))
 
     try:
     
         queries = await read_query_data(db, start_timestamp, end_timestamp)
+
+        logger.debug("read_queries(start_timestamp=%s, end_timestamp=%s): returning: %s", str(start_timestamp), str(end_timestamp), str(queries))
 
         return queries
 

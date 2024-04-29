@@ -1,10 +1,9 @@
--- Create the database for the arXiv project
+
 CREATE DATABASE arxiv;
 
--- Connect to the database to proceed with table creation
 \c arxiv
 
--- Create table for storing query metadata
+-- For storing query metadata
 CREATE TABLE queries (
     id SERIAL PRIMARY KEY,   -- ID and primary key
     query_id BIGINT,         -- Unique identifier of the query (from sequence, same as in the results table)
@@ -15,7 +14,7 @@ CREATE TABLE queries (
     query TEXT               -- The actual query string sent to arXiv
 );
 
--- Create table for storing individual results from each query
+-- For storing individual results from each query
 CREATE TABLE results (
     id SERIAL PRIMARY KEY,   -- ID and primary key
     query_id BIGINT,         -- Unique identifier of the query (from sequence, same as in the queries table)
@@ -26,11 +25,11 @@ CREATE TABLE results (
     journal TEXT             -- Journal reference, if available
 );
 
--- Creating indices for the queries table to optimize search by timestamp and query_id
+-- Indices for the queries table to search by timestamp and query_id
 CREATE INDEX idx_query_timestamp ON queries (timestamp);
 CREATE INDEX idx_query_query_id ON queries (query_id);
 
--- Creating indices for the results table to optimize search by timestamp and query_id
+-- Indices for the results table to search by timestamp and query_id
 CREATE INDEX idx_result_timestamp ON results (timestamp);
 CREATE INDEX idx_result_query_id ON results (query_id);
 
@@ -50,16 +49,15 @@ GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO arxiv_ro;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO arxiv_ro;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE ON SEQUENCES TO arxiv_ro;
 
--- Revoke all rights from public role, tighten security
+-- Revoke all rights from public role
 REVOKE ALL ON DATABASE arxiv FROM PUBLIC;
 
--- Create a separate database for managing sequences
+-- Create a separate database for the sequence
 CREATE DATABASE arxiv_sequence;
 
--- Connect to the newly created sequence database
 \c arxiv_sequence
 
--- Create a sequence that increments by one
+-- To provide a unique ID for the query and the connectinq records
 CREATE SEQUENCE arxiv_sequence
     INCREMENT 1
     START 1
@@ -72,5 +70,5 @@ GRANT CONNECT ON DATABASE arxiv_sequence TO arxiv_sequence;
 GRANT USAGE ON SCHEMA public TO arxiv_sequence;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO arxiv_sequence;
 
--- Revoke general public access to tighten security
+-- Revoke all rights from public role
 REVOKE ALL ON DATABASE arxiv_sequence FROM PUBLIC;

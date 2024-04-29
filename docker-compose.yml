@@ -17,12 +17,13 @@ services:
       - DATABASE_SEQUENCE_STRING=host='db-rw' port=5432 dbname='arxiv_sequence' user='arxiv_sequence' password='notsecurepassword'
       - DEFAULT_MAX_QUERY_RESULTS=8
       - RESULTS_DEFAULT_PAGE=0
-      - RESULTS_DEFAULT_ITEMS_PER_PAGE=100
+      - RESULTS_DEFAULT_ITEMS_PER_PAGE=10
+      - TIMEZONE_OFFSET=0
       - LOG_LEVEL=DEBUG
     depends_on:
       - db-rw
       - syslog-ng
-    command: ["/code/wait-for-it.sh", "syslog-ng:601", "-t", "20", "--", "/code/wait-for-it.sh", "db-rw:5432", "-t", "20", "--", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    command: ["/code/wait-for.sh", "syslog-ng:601", "-t", "20", "--", "/code/wait-for.sh", "db-rw:5432", "-t", "20", "--", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
     logging:
       driver: syslog

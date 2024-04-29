@@ -9,13 +9,23 @@ import logging
 logger = logging.getLogger('fastapi')
 
 # Retrieves result records from the database based on pagination.
-async def read_results_data(db: AsyncSession, page: int, items_per_page: int):
-    logger.debug("read_results_data(page=%d, items_per_page=%d):", page, items_per_page)
-
+async def read_results_data(
+    db: AsyncSession,
+    page: int,
+    items_per_page: int):
+    logger.info("read_results_data(page=%s, items_per_page=%s): called", str(page), str(items_per_page))
+# TypeError: can't multiply sequence by non-int of type 'tuple'
     try: 
-        statement = select(ArxivResult).offset(page * items_per_page).limit(items_per_page)
+        statement = select(
+            ArxivResult.author, 
+            ArxivResult.title, 
+            ArxivResult.journal
+        ).offset(page * items_per_page).limit(items_per_page)
         result = await db.execute(statement)
-        result_records = result.scalars().all()
+
+        result_records = result.mappings().all()
+
+        logger.debug("read_results_data(page=%s, items_per_page=%s): returning: %s", str(page), str(items_per_page), str(result_records))
 
         return result_records
 

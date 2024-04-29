@@ -15,13 +15,15 @@ router = APIRouter()
 # Endpoint to fetch result data through the /read-results internal API call.
 @router.get("/results")
 async def results(
-    page: Optional[int] = Query(results_default_page, description="Page number for pagination"),
-    items_per_page: Optional[int] = Query(results_default_items_per_page, description="Number of items per page")):
+    page: Optional[int] = Query(default=results_default_page, description="Page number for pagination"),
+    items_per_page: Optional[int] = Query(default=results_default_items_per_page, description="Number of items per page")):
 
-    logger.debug("results(page=%d, items_per_page=%d):", page, items_per_page)
+    logger.notice("results(page=%s, items_per_page=%s): called", str(page), str(items_per_page))
 
     try:
         result_data = await get_results_data(page, items_per_page)
+        
+        logger.debug("results(page=%s, items_per_page=%s): returning: %s", str(page), str(items_per_page), str(result_data))
 
         return result_data
 
