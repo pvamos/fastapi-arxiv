@@ -11,7 +11,7 @@ class ArxivQuery(Base):
     query_id = Column(BigInteger)
     timestamp = Column(BigInteger)
     status = Column(SmallInteger)
-    num_results = Column(SmallInteger)
+    num_results = Column(Integer)
     num_entries = Column(SmallInteger)
     query = Column(Text)
 

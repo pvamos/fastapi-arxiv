@@ -21,13 +21,13 @@ async def search_arxiv_api(
     journal: Optional[str] = Query(None, min_length=1, description="Journal name to filter"),
     max_results: Optional[int] = Query(default_max_query_results, ge=1, description="Maximum number of results to return")):
 
-    logger.debug("search_arxiv_api(author=%s, title=%s, journal=%s, max_results=%d)", author, title, journal, max_results)
+    logger.notice("search_arxiv_api(author=%s, title=%s, journal=%s, max_results=%s): called", author, title, journal, str(max_results))
 
     try:
         feed, timestamp, status, num_results, num_entries, query = await scrape_arxiv_api(author, title, journal, max_results)
         results = process_feed(feed)
 
-        logger.debug("search_arxiv_api(): str(data)=%s, timestamp=%d, status=%d, num_results=%d, num_entries=%d, query=%s", str(results), timestamp, status, num_results, num_entries, query)
+        logger.debug("search_arxiv_api(author=%s, title=%s, journal=%s, max_results=%s): returning: %s", author, title, journal, str(max_results), str({"data": results, "timestamp": timestamp, "status": status, "num_results": num_results, "num_entries": num_entries, "query": query}))
 
         return {"data": results, "timestamp": timestamp, "status": status, "num_results": num_results, "num_entries": num_entries, "query": query}
 

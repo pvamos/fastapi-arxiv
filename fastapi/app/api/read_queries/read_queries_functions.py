@@ -5,6 +5,7 @@ from sqlalchemy.future import select
 from sqlalchemy.sql import func, text, expression
 from fastapi import HTTPException
 from ..models import ArxivQuery
+from ..dependencies import timezone_offset
 from typing import Optional
 import logging
 
@@ -34,7 +35,7 @@ async def read_query_data(
             logger.debug("read_query_data() end_timestamp is 'None', not adding query criteria")
 
         # Format the timestamp in the select statement
-        formatted_timestamp = func.to_char(func.to_timestamp(ArxivQuery.timestamp), 'YYYY-MM-DD"T"HH24:MI:SS').label('timestamp')
+        formatted_timestamp = func.to_char(func.to_timestamp(ArxivQuery.timestamp + (3600 * timezone_offset)), 'YYYY-MM-DD"T"HH24:MI:SS').label('timestamp')
 
         # Add "ArXiv Query: " to the beginning of query
         formatted_query = func.concat('ArXiv Query: ', ArxivQuery.query).label('query')

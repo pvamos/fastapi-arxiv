@@ -23,7 +23,7 @@ async def search_arxiv(
     journal: Optional[str] = Query(None, min_length=1, description="Journal name to filter"),
     max_results: Optional[int] = Query(default_max_query_results, ge=1, description="Maximum number of results to return")):
 
-    logger.info("search_arxiv(author=%s, title=%s, journal=%s, max_results=%d):", author, title, journal, max_results)
+    logger.notice("search_arxiv(author=%s, title=%s, journal=%s, max_results=%d): called", author, title, journal, max_results)
 
     if not (author or title or journal):
         logger.error("search_arxiv(): Validation failed: At least one search parameter must be provided")
@@ -38,7 +38,7 @@ async def search_arxiv(
         await save_query_record(query_id, timestamp, status, num_results, num_entries, query)
         await save_result_records(query_id, timestamp, data)
 
-        logger.info("Successfully processed query with ID %d", query_id)
+        logger.debug("search_arxiv(author=%s, title=%s, journal=%s, max_results=%d): Successfully processed query with ID %d, returns: %s", author, title, journal, max_results, query_id, str({"timestamp": timestamp, "status": status, "num_results": num_results, "num_entries": num_entries}))
 
         return {"timestamp": timestamp, "status": status, "num_results": num_results, "num_entries": num_entries}
 

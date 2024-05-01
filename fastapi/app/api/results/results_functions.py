@@ -3,6 +3,7 @@
 import httpx
 from fastapi import HTTPException
 import logging
+from ..dependencies import httpx_internal_timeout
 
 logger = logging.getLogger('fastapi')
 
@@ -13,7 +14,7 @@ async def get_results_data(page: int, items_per_page: int):
 
     url = f"http://localhost:8000/read-results?page={page}&items_per_page={items_per_page}"
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=httpx_internal_timeout) as client:
             response = await client.get(url)
             response.raise_for_status()
             

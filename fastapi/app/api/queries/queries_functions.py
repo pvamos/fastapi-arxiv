@@ -5,6 +5,7 @@ from fastapi import HTTPException
 from typing import Optional
 from datetime import datetime, timedelta, timezone
 import logging
+from ..dependencies import httpx_internal_timeout
 
 logger = logging.getLogger('fastapi')
 
@@ -13,14 +14,14 @@ logger = logging.getLogger('fastapi')
 async def get_query_data(
     start_timestamp: int,
     end_timestamp: Optional[int] = None):
-    logger.notice("get_query_data(start_timestamp=%s, end_timestamp=%s): called", str(start_timestamp), str(end_timestamp))
+    logger.info("get_query_data(start_timestamp=%s, end_timestamp=%s): called", str(start_timestamp), str(end_timestamp))
 
     url = f"http://localhost:8000/read-queries?start_timestamp={start_timestamp}"
     if end_timestamp is not None:
         url += f"&end_timestamp={end_timestamp}"
 
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=httpx_internal_timeout) as client:
             response = await client.get(url)
             response.raise_for_status()
             

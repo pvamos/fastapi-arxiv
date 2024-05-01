@@ -1,3 +1,5 @@
+# app/api/schemas.py
+
 from pydantic import BaseModel
 
 class QueryRange(BaseModel):

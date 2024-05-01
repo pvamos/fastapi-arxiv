@@ -5,13 +5,14 @@ from fastapi import HTTPException
 import feedparser
 from email.utils import parsedate_to_datetime
 import logging
+from ..dependencies import httpx_external_timeout
 
 logger = logging.getLogger('fastapi')
 
 
 # Constructs the search query for the arXiv API.
 def build_search_query(author: str = None, title: str = None, journal: str = None):
-    logger.debug("build_search_query(author=%s, title=%s, journal=%s)", author, title, journal)
+    logger.info("build_search_query(author=%s, title=%s, journal=%s): called", author, title, journal)
 
     search_query_parts = []
 
@@ -32,20 +33,21 @@ def build_search_query(author: str = None, title: str = None, journal: str = Non
         raise HTTPException(status_code=422, detail=f"Invalid search parameters: {str(e)}")
 
     retval = '+AND+'.join(search_query_parts)
-    logger.debug("build_search_query(): %s", retval)
+    logger.debug("build_search_query(author=%s, title=%s, journal=%s): returning: %s", author, title, journal, str(retval))
+
 
     return retval
 
 
 # Fetches data from the external arXiv API and handles HTTP errors.
 async def scrape_arxiv_api(author, title, journal, max_results):
-    logger.info("scrape_arxiv_api(author=%s, title=%s, journal=%s, max_results=%s)", author, title, journal, max_results)
+    logger.info("scrape_arxiv_api(author=%s, title=%s, journal=%s, max_results=%s): called", author, title, journal, max_results)
 
     search_query = build_search_query(author, title, journal)
     url = f"https://export.arxiv.org/api/query?search_query={search_query}&max_results={max_results}"
 
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=httpx_external_timeout) as client:
             logger.info("httpx.client.get(%s)", url)
             response = await client.get(url)
             response.raise_for_status()
@@ -72,13 +74,15 @@ async def scrape_arxiv_api(author, title, journal, max_results):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing arXiv API response: {str(e)}")
 
+    logger.debug("scrape_arxiv_api(author=%s, title=%s, journal=%s, max_results=%s): returning: feed=%s, timestamp=%s, response.status_code=%d, total_results=%d, num_entries=%d, query_title=%s", author, title, journal, max_results, str(feed), str(timestamp), response.status_code, total_results, num_entries, query_title)
+
     return feed, timestamp, response.status_code, total_results, num_entries, query_title
 
 
 # Processes the feed data parsed by feedparser and structures it for response.
 def process_feed(feed):
-    logger.info("process_feed(feed): len(feed)=%d", len(feed))
-    logger.debug("process_feed(feed): feed=%s", str(feed))
+    logger.info("process_feed(feed): called: len(feed)=%d", len(feed))
+    logger.debug("process_feed(feed): str(feed)=%s", str(feed))
 
     results = []
     for entry in feed.entries:
@@ -97,7 +101,7 @@ def process_feed(feed):
         }
         results.append(result)
 
-    logger.debug("process_feed(): value=%s", str(results))
+    logger.debug("process_feed(feed): str(feed)=%s returning: %s", str(feed), str(results))
 
     return results
 

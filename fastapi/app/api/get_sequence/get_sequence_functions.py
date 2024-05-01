@@ -14,7 +14,7 @@ logger = logging.getLogger('fastapi')
 # It is not able perform this simple query:  SELECT nextval('arxiv_sequence')
 # So I'm forced to use psycopg2 for this.
 async def retrieve_sequence_value():
-    logger.debug("retrieve_sequence_value() called")
+    logger.info("retrieve_sequence_value() called")
 
     try:
         conn = psycopg2.connect(sequence_psycopg2_connect_string)
@@ -28,7 +28,7 @@ async def retrieve_sequence_value():
             curs.execute("SELECT nextval('arxiv_sequence')")
             single_row = curs.fetchone()
             sequence_value = single_row[0] if single_row else None
-            logger.debug("retrieve_sequence_value() value is: %s", sequence_value)
+            logger.debug("retrieve_sequence_value() returning: %s", sequence_value)
 
             return sequence_value
 

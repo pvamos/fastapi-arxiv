@@ -6,16 +6,6 @@ I've created separate stateless microservices:
 -
 -
 
-I'm starting the containers waiting for each-other, like FastAPI endpoints container waits until PostgreSQL DB is listening.
-
-## wait-for.sh
-
-I've solved this waiting with this side-quest, I refactored a 4 years old sript to also work on Alpine Linux's ash shell provided by BusyBox:
-
-https://github.com/pvamos/wait-for
-Pure POSIX bash/ash script that will wait until response from a host and TCP port, then execute a command. 
-
-
 The code contains all API endpoints together, it needs minimal effort to keep only 
 
 These database tables are used:

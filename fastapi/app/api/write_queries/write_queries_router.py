@@ -15,7 +15,7 @@ router = APIRouter()
 # Endpoint to write a query record into the database. Accepts JSON data as input and saves it.
 @router.post("/write-queries", status_code=201)
 async def write_query(data: dict = Body(...), db: AsyncSession = Depends(get_database_session_rw)):
-    logger.info("write_query(data): len(data)=%d", len(data))
+    logger.notice("write_query(data): len(data)=%d", len(data))
     logger.debug("write_query(data): data=%s", str(data))
 
     try:

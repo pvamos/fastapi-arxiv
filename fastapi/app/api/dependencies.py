@@ -22,7 +22,9 @@ SessionLocalRO = sessionmaker(autocommit=False, autoflush=False, bind=engine_ro,
 default_max_query_results = settings.DEFAULT_MAX_QUERY_RESULTS
 results_default_page = int(settings.RESULTS_DEFAULT_PAGE)
 results_default_items_per_page = int(settings.RESULTS_DEFAULT_ITEMS_PER_PAGE)
-
+httpx_internal_timeout = int(settings.HTTPX_INTERNAL_TIMEOUT)
+httpx_external_timeout = int(settings.HTTPX_EXTERNAL_TIMEOUT)
+set_log_level = settings.LOG_LEVEL
 
 # Convert timezone offset parameter to integer, default to 0 if invalid
 try:

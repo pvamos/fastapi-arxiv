@@ -1,34 +1,35 @@
-# app/api/main.py
+# app/main.py
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 import logging
-from .api import init_app
 import uvicorn
 import os
-
+from .api.dependencies import set_log_level
+from .api import init_app
 
 # Add custom NOTICE logging level
 logging.NOTICE = 25
 logging.addLevelName(logging.NOTICE, "NOTICE")
 
-# Add custom NOTICE logging level
+# Custom NOTICE logging method with stacklevel adjustment
 def notice(self, message, *args, **kws):
     if self.isEnabledFor(logging.NOTICE):
-        self._log(logging.NOTICE, message, args, **kws)
+        # stacklevel=2 ensures the correct function call location is logged
+        self._log(logging.NOTICE, message, args, kws, stacklevel=2)
 
 # Attaching the custom method to Logger class
 logging.Logger.notice = notice
 
 # Function to initialize logging
 def configure_logging():
-    log_level = os.getenv('LOG_LEVEL', 'INFO').upper()  # Default to INFO if not set
+    log_level = set_log_level.upper()
     logging_config = dict(
         version=1,
         disable_existing_loggers=False,
         formatters={
             'detailed': {
-                'format': '%(asctime)s UTC [%(levelname)s] %(name)s - %(module)s.%(funcName)s - %(message)s'
+                'format': '%(asctime)s %(levelname)s %(name)s - %(module)s.%(funcName)s - %(message)s'
             }
         },
         handlers={
@@ -49,14 +50,12 @@ def configure_logging():
     )
     logging.config.dictConfig(logging_config)
 
-
 app = FastAPI()
 
 configure_logging()
 
 logger = logging.getLogger('fastapi')
 logger.notice("Logging initialized with %s", os.getenv('LOG_LEVEL', 'INFO').upper())
-
 
 # HTTPException handler
 @app.exception_handler(HTTPException)
@@ -77,6 +76,6 @@ async def general_exception_handler(request: Request, exc: Exception):
 init_app(app)
 
 # This only runs if main.py is called directly, and not imported
-#  (happens when runing direcly, not in Docker)
+#  (happens when running directly, not in Docker)
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000)

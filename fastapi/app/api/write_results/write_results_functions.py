@@ -11,7 +11,7 @@ logger = logging.getLogger('fastapi')
 
 # Saves result records in the database.
 async def write_result_records(db: AsyncSession, result_data: dict):
-    logger.info("write_result_records(result_data): len(query_data)=%d", len(result_data))
+    logger.notice("write_result_records(result_data): len(query_data)=%d", len(result_data))
     logger.debug("write_result_records(result_data): query_data=%s", str(result_data))
 
     try:

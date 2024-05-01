@@ -12,7 +12,7 @@ router = APIRouter()
 # Endpoint to get a sequence value from the database. This is typically used for generating unique identifiers.
 @router.get("/get-sequence")
 async def retrieve_sequence():
-    logger.debug("retrieve_sequence() called")
+    logger.notice("retrieve_sequence() called")
 
     try:
         sequence = await retrieve_sequence_value()

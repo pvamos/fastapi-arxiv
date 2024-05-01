@@ -1,3 +1,5 @@
+# app/api/config.py
+
 import os
 
 class Settings:
@@ -12,5 +14,8 @@ class Settings:
     RESULTS_DEFAULT_PAGE=os.getenv("RESULTS_DEFAULT_PAGE")
     RESULTS_DEFAULT_ITEMS_PER_PAGE=os.getenv("RESULTS_DEFAULT_ITEMS_PER_PAGE")
     TIMEZONE_OFFSET=os.getenv("TIMEZONE_OFFSET")
+    HTTPX_INTERNAL_TIMEOUT=os.getenv("HTTPX_INTERNAL_TIMEOUT")
+    HTTPX_EXTERNAL_TIMEOUT=os.getenv("HTTPX_EXTERNAL_TIMEOUT")
+    LOG_LEVEL=os.getenv("LOG_LEVEL")
 
 settings = Settings()

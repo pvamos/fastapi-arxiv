@@ -9,7 +9,7 @@ CREATE TABLE queries (
     query_id BIGINT,         -- Unique identifier of the query (from sequence, same as in the results table)
     timestamp BIGINT,        -- Unix timestamp of the query (same as in the results table)
     status SMALLINT,         -- HTTP status code of the response
-    num_results SMALLINT,    -- Number of results found reported by the query
+    num_results INTEGER,    -- Number of results found reported by the query
     num_entries SMALLINT,    -- Number of result entries returned (and stored) by the query
     query TEXT               -- The actual query string sent to arXiv
 );
