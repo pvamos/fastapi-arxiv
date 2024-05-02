@@ -1,10 +1,11 @@
 version: '3.9'
 
 services:
-  fastapi:
+
+  frontend:
     build:
       context: ./
-      dockerfile: fastapi/Dockerfile
+      dockerfile: frontend/Dockerfile
     ports:
       - "8000:8000"
     environment:
@@ -21,25 +22,50 @@ services:
       - TIMEZONE_OFFSET=2
       - HTTPX_INTERNAL_TIMEOUT=10
       - HTTPX_EXTERNAL_TIMEOUT=10
-      - ARXIV_API_URL=http://localhost:8000/arxiv-api
-      - GET_SEQUENCE_URL=http://localhost:8000/get-sequence
-      - WRITE_QUERIES_URL=http://localhost:8000/write-queries
-      - WRITE_RESULTS_URL=http://localhost:8000/write-results
-      - READ_QUERIES_URL=http://localhost:8000/read-queries
-      - READ_RESULTS_URL=http://localhost:8000/read-results
-      - FASTAPI_LOGGER_NAME=fastapi
+      - ARXIV_API_URL=http://backend:8001/arxiv-api
+      - GET_SEQUENCE_URL=http://backend:8001/get-sequence
+      - WRITE_QUERIES_URL=http://backend:8001/write-queries
+      - WRITE_RESULTS_URL=http://backend:8001/write-results
+      - READ_QUERIES_URL=http://backend:8001/read-queries
+      - READ_RESULTS_URL=http://backend:8001/read-results
+      - FASTAPI_LOGGER_NAME=frontend
       - LOG_LEVEL=DEBUG
     depends_on:
       - db-rw
-      - syslog-ng
-    command: ["/code/wait-for.sh", "syslog-ng:601", "-t", "20", "--", "/code/wait-for.sh", "db-rw:5432", "-t", "20", "--", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+      - backend
+    command: ["/code/wait-for.sh", "backend:8001", "-t", "20", "--", "/code/wait-for.sh", "db-rw:5432", "-t", "20", "--", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
-    logging:
-      driver: syslog
-      options:
-        syslog-address: "tcp://localhost:601"
-        syslog-format: "rfc5424"
-        tag: "fastapi-container"
+  backend:
+    build:
+      context: ./
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - DATABASE_RW_URL=postgresql+asyncpg://arxiv_rw:notsecurepassword@db-rw:5432/arxiv
+      - DATABASE_RO_URL=postgresql+asyncpg://arxiv_ro:notsecurepassword@db-rw:5432/arxiv
+#      - DATABASE_SEQUENCE_URL=postgresql+asyncpg://arxiv_sequence:notsecurepassword@db-rw:5432/arxiv_sequence
+# Sqlalchemy has a known issue with Postgres Sequence objects.
+# It is not able perform this simple query:  SELECT nextval('arxiv_sequence');
+# So I'm forced to use psycopg2 for this.
+      - DATABASE_SEQUENCE_STRING=host='db-rw' port=5432 dbname='arxiv_sequence' user='arxiv_sequence' password='notsecurepassword'
+      - DEFAULT_MAX_QUERY_RESULTS=8
+      - RESULTS_DEFAULT_PAGE=0
+      - RESULTS_DEFAULT_ITEMS_PER_PAGE=10
+      - TIMEZONE_OFFSET=2
+      - HTTPX_INTERNAL_TIMEOUT=10
+      - HTTPX_EXTERNAL_TIMEOUT=10
+      - ARXIV_API_URL=http://backend:8001/arxiv-api
+      - GET_SEQUENCE_URL=http://backend:8001/get-sequence
+      - WRITE_QUERIES_URL=http://backend:8001/write-queries
+      - WRITE_RESULTS_URL=http://backend:8001/write-results
+      - READ_QUERIES_URL=http://backend:8001/read-queries
+      - READ_RESULTS_URL=http://backend:8001/read-results
+      - FASTAPI_LOGGER_NAME=backend
+      - LOG_LEVEL=DEBUG
+    depends_on:
+      - db-rw
+    command: ["/code/wait-for.sh", "db-rw:5432", "-t", "20", "--", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001"]
 
   db-rw:
     build:
@@ -53,33 +79,9 @@ services:
     environment:
       - POSTGRES_USER=wurzel
       - POSTGRES_PASSWORD=notsecurepassword
-    depends_on:
-      - syslog-ng
     restart: unless-stopped
-    logging:
-      driver: syslog
-      options:
-        syslog-address: "tcp://localhost:601"
-        syslog-format: "rfc5424"
-        tag: "db-rw-container"
     healthcheck:
       test: ["CMD", "netstat", "-ln", "|", "grep", "5432"]
-      interval: 3s
-      timeout: 2s
-      retries: 5
-
-  syslog-ng:
-    build: ./syslog-ng
-    volumes:
-      - ./syslog-ng/syslog-ng.conf:/config/syslog-ng.conf
-#      - /path/to/log:/var/log #optional
-    ports:
-#      - 514/udp
-      - 601:601/tcp
-#      - 6514/tcp
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "netstat", "-ln", "|", "grep", "601"]
       interval: 3s
       timeout: 2s
       retries: 5
