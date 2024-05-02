@@ -3,11 +3,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from .read_results_functions import read_results_data
-from ..dependencies import get_database_session_ro
-from ..dependencies import results_default_page, results_default_items_per_page
+from ..dependencies import get_database_session_ro, results_default_page, results_default_items_per_page, fastapi_logger_name
 import logging
 
-logger = logging.getLogger('fastapi')
+logger = logging.getLogger(fastapi_logger_name)
 
 
 router = APIRouter()

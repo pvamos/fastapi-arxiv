@@ -5,13 +5,13 @@ from sqlalchemy.future import select
 from sqlalchemy.sql import func, text, expression
 from fastapi import HTTPException
 from ..models import ArxivQuery
-from ..dependencies import timezone_offset
+from ..dependencies import timezone_offset, fastapi_logger_name
 from typing import Optional
 import logging
 
 
 
-logger = logging.getLogger('fastapi')
+logger = logging.getLogger(fastapi_logger_name)
 
 async def read_query_data(
     db: AsyncSession,

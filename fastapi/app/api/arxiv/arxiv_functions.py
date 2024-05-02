@@ -4,9 +4,9 @@ import httpx
 from fastapi import HTTPException
 import feedparser
 import logging
-from ..dependencies import httpx_internal_timeout
+from ..dependencies import httpx_internal_timeout, arxiv_api_url, get_sequence_url, write_queries_url, write_results_url, fastapi_logger_name
 
-logger = logging.getLogger('fastapi')
+logger = logging.getLogger(fastapi_logger_name)
 
 
 # Build /arxiv-api endpoint search parameters
@@ -31,7 +31,7 @@ def build_query_params(
     return query_params
 
 
-# Interacts with the /arxiv-api endpoint to fetch data and handle errors appropriately.
+# Fetch data from /arxiv-api endpoint
 async def fetch_arxiv_data(
     author,
     title,
@@ -39,7 +39,7 @@ async def fetch_arxiv_data(
     max_results):
     logger.info("fetch_arxiv_data(author=%s, title=%s, journal=%s, max_results=%s): called", author, title, journal, max_results)
 
-    base_url = "http://localhost:8000/arxiv-api"
+    base_url = arxiv_api_url
     query_params = build_query_params(author, title, journal, max_results)
     query_string = "&".join(f"{key}={value}" for key, value in query_params.items() if value is not None)
     api_url = f"{base_url}?{query_string}"
@@ -63,7 +63,7 @@ async def fetch_arxiv_data(
         raise HTTPException(status_code=503, detail=f"Internal arXiv API service is unavailable: {str(e)}")
 
 
-# Processes the feed data parsed by feedparser and structures it for response.
+# Process feed data, transform 'authors'
 def process_feed(feed):
     logger.info("process_feed(feed): called: len(feed)=%d", len(feed))
     logger.debug("process_feed(feed): called: feed=%s", str(feed))
@@ -82,11 +82,11 @@ def process_feed(feed):
     return results
 
 
-# Fetches a unique postgres sequence value from the /get-sequence endpoint.
+# Fetch a unique postgres sequence value from /get-sequence endpoint
 async def get_sequence_value():
     logger.info("get_sequence_value(): called")
     
-    api_url = "http://localhost:8000/get-sequence"
+    api_url = get_sequence_url
 
     try:
         async with httpx.AsyncClient(timeout=httpx_internal_timeout) as client:
@@ -104,7 +104,7 @@ async def get_sequence_value():
         raise HTTPException(status_code=503, detail=f"Service to get sequence data is unavailable: {str(e)}")
 
 
-# Saves a record to 'queries' table using the /write-queries endpoint.
+# Save a record to 'queries' table using /write-queries endpoint
 async def save_query_record(
     query_id,
     timestamp,
@@ -114,7 +114,7 @@ async def save_query_record(
     query):
     logger.info("save_query_record(query_id=%d, timestamp=%d, status=%d, num_results=%d, num_entries=%d, query=%s): called", query_id, timestamp, status, num_results, num_entries, query)
 
-    api_url = "http://localhost:8000/write-queries"
+    api_url = write_queries_url
     query_data = {
         "query_id": query_id,
         "timestamp": timestamp,
@@ -139,13 +139,13 @@ async def save_query_record(
         raise HTTPException(status_code=503, detail=f"Service to write query data is unavailable: {str(e)}")
 
 
-# Saves result records to 'results' table using the /write-results endpoint.
+# Save result records to 'results' table using the /write-results endpoint
 async def save_result_records(query_id, timestamp, results):
     logger.info("save_result_records(query_id=%s, timestamp=%s, results): called: len(results)=%d", str(query_id), str(timestamp), len(results))
     logger.debug("save_result_records(query_id=%s, timestamp=%s, results): called: str(results)=%s", str(query_id), str(timestamp), str(results))
 
 
-    api_url = "http://localhost:8000/write-results"
+    api_url = write_results_url
     results_data = {
         "query_id": query_id,
         "timestamp": timestamp,

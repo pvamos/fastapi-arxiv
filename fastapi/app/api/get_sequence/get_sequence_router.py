@@ -2,9 +2,10 @@
 
 from fastapi import APIRouter, HTTPException
 from .get_sequence_functions import retrieve_sequence_value
+from ..dependencies import fastapi_logger_name
 import logging
 
-logger = logging.getLogger('fastapi')
+logger = logging.getLogger(fastapi_logger_name)
 
 
 router = APIRouter()

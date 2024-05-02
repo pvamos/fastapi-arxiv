@@ -4,9 +4,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
 from fastapi import HTTPException
 from ..models import ArxivResult
+from ..dependencies import fastapi_logger_name
 import logging
 
-logger = logging.getLogger('fastapi')
+logger = logging.getLogger(fastapi_logger_name)
 
 
 # Saves result records in the database.

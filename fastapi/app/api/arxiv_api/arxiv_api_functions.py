@@ -5,9 +5,9 @@ from fastapi import HTTPException
 import feedparser
 from email.utils import parsedate_to_datetime
 import logging
-from ..dependencies import httpx_external_timeout
+from ..dependencies import httpx_external_timeout, fastapi_logger_name
 
-logger = logging.getLogger('fastapi')
+logger = logging.getLogger(fastapi_logger_name)
 
 
 # Constructs the search query for the arXiv API.

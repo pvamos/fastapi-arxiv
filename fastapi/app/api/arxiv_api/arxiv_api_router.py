@@ -4,9 +4,9 @@ from fastapi import APIRouter, HTTPException, Query
 from typing import Optional
 from .arxiv_api_functions import scrape_arxiv_api, process_feed
 import logging
-from ..dependencies import default_max_query_results
+from ..dependencies import default_max_query_results, fastapi_logger_name
 
-logger = logging.getLogger('fastapi')
+logger = logging.getLogger(fastapi_logger_name)
 
 
 router = APIRouter()

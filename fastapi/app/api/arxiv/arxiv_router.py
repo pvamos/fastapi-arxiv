@@ -3,10 +3,10 @@
 from fastapi import APIRouter, Query, HTTPException
 from typing import Optional
 from .arxiv_functions import fetch_arxiv_data, get_sequence_value, save_query_record, save_result_records
-from ..dependencies import default_max_query_results
+from ..dependencies import default_max_query_results, fastapi_logger_name
 import logging
 
-logger = logging.getLogger('fastapi')
+logger = logging.getLogger(fastapi_logger_name)
 
 
 router = APIRouter()

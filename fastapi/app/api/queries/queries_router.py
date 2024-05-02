@@ -3,11 +3,11 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, Body
 from .queries_functions import get_query_data, convert_to_unix_timestamp
 from typing import Optional
-from ..dependencies import timezone_offset
+from ..dependencies import timezone_offset, fastapi_logger_name
 import json
 import logging
 
-logger = logging.getLogger('fastapi')
+logger = logging.getLogger(fastapi_logger_name)
 
 
 router = APIRouter()

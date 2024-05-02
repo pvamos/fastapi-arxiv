@@ -21,6 +21,13 @@ services:
       - TIMEZONE_OFFSET=2
       - HTTPX_INTERNAL_TIMEOUT=10
       - HTTPX_EXTERNAL_TIMEOUT=10
+      - ARXIV_API_URL=http://localhost:8000/arxiv-api
+      - GET_SEQUENCE_URL=http://localhost:8000/get-sequence
+      - WRITE_QUERIES_URL=http://localhost:8000/write-queries
+      - WRITE_RESULTS_URL=http://localhost:8000/write-results
+      - READ_QUERIES_URL=http://localhost:8000/read-queries
+      - READ_RESULTS_URL=http://localhost:8000/read-results
+      - FASTAPI_LOGGER_NAME=fastapi
       - LOG_LEVEL=DEBUG
     depends_on:
       - db-rw

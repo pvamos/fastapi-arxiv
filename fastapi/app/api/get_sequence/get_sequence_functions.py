@@ -1,11 +1,11 @@
 # app/api/get_sequence/get_sequence_functions.py
 
 import psycopg2
-from ..dependencies import sequence_psycopg2_connect_string
+from ..dependencies import sequence_psycopg2_connect_string, fastapi_logger_name
 from fastapi import HTTPException
 import logging
 
-logger = logging.getLogger('fastapi')
+logger = logging.getLogger(fastapi_logger_name)
 
 
 # Retrieves a sequence value from the database using psycopg2.
