@@ -23,7 +23,7 @@ def build_search_query(author: str = None, title: str = None, journal: str = Non
             search_query_parts.append(f"ti:{title}")
         if journal:
             search_query_parts.append(f"jr:{journal}")
-    
+
         if not search_query_parts:
             logging.error("HTTP 400 At least one search parameter must be provided: %s", str(e))
             raise HTTPException(status_code=400, detail="At least one search parameter must be provided.")
@@ -52,10 +52,10 @@ async def scrape_arxiv_api(author, title, journal, max_results):
             response = await client.get(url)
             response.raise_for_status()
             logger.info("httpx.client.get(%s): HTTP %d", url, response.status_code)
-    
+
             feed = feedparser.parse(response.content)
             logger.debug("scrape_arxiv_api() str(feed)=%s", str(feed))
-            
+
             if not feed.entries:
                 logging.error("scrape_arxiv_api(): HTTP 404, No results found.")
                 raise HTTPException(status_code=404, detail=f"scrape_arxiv_api(): No results found. {str(e)}")
@@ -86,14 +86,14 @@ def process_feed(feed):
 
     results = []
     for entry in feed.entries:
-    
+
         # Process authors
         if hasattr(entry, 'authors'):
             authors_list = entry.get('authors', ["No author available"])
             authors = ', '.join( [author.name for author in authors_list] )
         else:
             authors = "No authors available"
-            
+
         result = {
             "authors": authors,
             "title": getattr(entry, 'title', ''),

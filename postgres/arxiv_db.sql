@@ -57,7 +57,7 @@ CREATE DATABASE arxiv_sequence;
 
 \c arxiv_sequence
 
--- To provide a unique ID for the query and the connectinq records
+-- To provide a unique ID for the query and the connectinq results records
 CREATE SEQUENCE arxiv_sequence
     INCREMENT 1
     START 1

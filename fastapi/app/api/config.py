@@ -27,7 +27,7 @@ class Settings:
     WRITE_RESULTS_URL=os.getenv("WRITE_RESULTS_URL")
     READ_QUERIES_URL=os.getenv("READ_QUERIES_URL")
     READ_RESULTS_URL=os.getenv("READ_RESULTS_URL")
-    
+
     FASTAPI_LOGGER_NAME=os.getenv("FASTAPI_LOGGER_NAME")
 
     LOG_LEVEL=os.getenv("LOG_LEVEL")
